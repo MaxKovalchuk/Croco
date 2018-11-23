@@ -1,16 +1,37 @@
 /* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
 .root{
-	-fx-background-color: #99ff66;
+	-fx-background-color: #000;
+	-fx-background-image: url("bg.jpg");
+	-fx-background-repeat: no-repeat;
+	-fx-background-size: 100.0% 100.0%;
 }
 
 #guess{
-	-fx-font-size: 50;
+	-fx-font-size: 50.0;
+	-fx-text-fill: #fff;
 }
 
 #wordToDraw{
-	-fx-font-size: 25;
+	-fx-font-size: 35.0;
+	-fx-text-fill: #fff;	
 }
 
 #inputLabel{
-	-fx-font-size: 40;
+	-fx-font-size: 60.0;
+	-fx-font-family: normal;
+
+}
+
+.outline.label .text {
+	-fx-font-weight: bold;
+	-fx-fill: #fff;
+	-fx-stroke: #000;
+    -fx-stroke-width: 2.0px;
+}
+
+.outlineHide.label .text {
+	-fx-font-weight: bold;
+	-fx-fill: #fff;
+	-fx-stroke: #000;
+    -fx-stroke-width: 0.5px;
 }

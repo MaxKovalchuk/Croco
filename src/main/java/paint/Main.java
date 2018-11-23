@@ -15,6 +15,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -24,19 +25,26 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 
 public class Main extends Application {
 	Scene mainScene = new Scene(new GridPane());
 	Button exit = new Button("Exit");
 	Button back = new Button("Back");
 	Button exitFromRoom = new Button("Leave");
-	Music music;
+	String mainMenuTheme = Main.class.getResource("/Herbie Hancock - The Eye Of The Hurricane.mp3").toString();
+	String inGameTheme = Main.class.getResource("/Kenny Burrell - Midnight Blue.mp3").toString();
+	Media music;
+	MediaPlayer player;
 	Button mute = new Button("Mute");
 
 	GridPane servOrClientPane = new GridPane();
@@ -91,6 +99,7 @@ public class Main extends Application {
 	GridPane clientVision = new GridPane();
 
 	public void gameStart() {
+		
 		wordBox.setVisible(false);
 		drawing.setVisible(false);
 		nextword.setVisible(false);
@@ -116,6 +125,10 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
+//		primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream("crocoIcon.png")));
+
+		wordToDraw.getStyleClass().add("outline");
+		guess.getStyleClass().add("outline");
 		try {
 			exit.setPrefSize(75, 30);
 			exit.setOnAction(event -> primaryStage.close());
@@ -128,13 +141,16 @@ public class Main extends Application {
 					e.printStackTrace();
 				}
 				mainScene.setRoot(servOrClientPane);
-				music.setSong(music.mainMenuTheme);
+				changeMusic(mainMenuTheme);
 			});
 			mute.setOnAction(event -> {
-				if(music.isPlaying()) {
-					music.setPlaying(false);
-				}else {
-					music.setPlaying(true);
+				if (player.isMute()) {
+					player.setMute(false);
+					player.play();
+				} else {
+					player.setMute(true);
+					player.stop();
+					player.setStartTime(Duration.ZERO);
 				}
 			});
 
@@ -151,7 +167,8 @@ public class Main extends Application {
 
 	public GridPane serverVisionPart() {
 		try {
-			music.setSong(music.inGameTheme);
+			changeMusic(inGameTheme);
+
 			drawPart();
 			chatPart();
 			guessPart();
@@ -172,7 +189,7 @@ public class Main extends Application {
 
 	public GridPane clientVisionPart() {
 		try {
-			music.setSong(music.inGameTheme);
+			changeMusic(inGameTheme);
 			drawPart();
 			chatPart();
 			guessPart();
@@ -192,7 +209,14 @@ public class Main extends Application {
 
 	@Override
 	public void init() {
-		music = new Music();
+		music = new Media(mainMenuTheme);
+		player = new MediaPlayer(music);
+		player.setStartTime(Duration.ZERO);
+		player.setOnEndOfMedia( ()-> {
+			player.seek(Duration.ZERO);
+			player.play();
+		});
+		player.play();
 		mainScene.setRoot(servOrClientPart());
 
 		g.setFill(Color.WHITE);
@@ -285,24 +309,26 @@ public class Main extends Application {
 		chat.setPrefSize(300, 600);
 		chat.setAlignment(Pos.TOP_LEFT);
 		input.setOnAction(event -> {
-			String message = playerName + ": ";
-			message += input.getText();
-			messages.appendText(message + '\n');
-			try {
-				connection.send(message);
-			} catch (Exception e) {
-				messages.appendText("Failed to send\n");
-			}
-			if (input.getText().equalsIgnoreCase(word)) {
-				guessed();
-				messages.appendText("CROCO: " + playerName + " guessed !\n");
+			if (!input.getText().equals("") || !input.getText().equals(" ")) {
+				String message = playerName + ": ";
+				message += input.getText();
+				messages.appendText(message + '\n');
 				try {
-					connection.send("CROCO: " + playerName + " guessed !\n");
+					connection.send(message);
 				} catch (Exception e) {
 					messages.appendText("Failed to send\n");
 				}
+				if (input.getText().equalsIgnoreCase(word)) {
+					guessed();
+					messages.appendText("CROCO: " + playerName + " guessed !\n");
+					try {
+						connection.send("CROCO: " + playerName + " guessed !\n");
+					} catch (Exception e) {
+						messages.appendText("Failed to send\n");
+					}
+				}
+				input.clear();
 			}
-			input.clear();
 		});
 	}
 
@@ -329,6 +355,8 @@ public class Main extends Application {
 	public GridPane loginPart() {
 		try {
 			VBox loginInBox = new VBox();
+			loginInput.setAlignment(Pos.CENTER);
+			loginLabel.getStyleClass().add("outline");
 			loginInBox.getChildren().add(loginLabel);
 			loginInBox.getChildren().add(loginInput);
 			loginInBox.getChildren().add(enterName);
@@ -400,6 +428,8 @@ public class Main extends Application {
 	public GridPane creatingServPart() {
 		try {
 			portLabel.setId("inputLabel");
+			portLabel.getStyleClass().add("outline");
+			portInput.setAlignment(Pos.CENTER);
 			servOK.setPrefSize(100, 50);
 			VBox servCreatingIn = new VBox();
 			servCreatingIn.getChildren().add(portLabel);
@@ -444,7 +474,11 @@ public class Main extends Application {
 			VBox clientCreatingIn = new VBox();
 			clientOK.setPrefSize(100, 50);
 			ipLabel.setId("inputLabel");
+			ipLabel.getStyleClass().add("outline");
 			portLabel.setId("inputLabel");
+			portLabel.getStyleClass().add("outline");
+			portInput.setAlignment(Pos.CENTER);
+			ipInput.setAlignment(Pos.CENTER);
 			clientCreatingIn.getChildren().add(ipLabel);
 			clientCreatingIn.getChildren().add(ipInput);
 			clientCreatingIn.getChildren().add(portLabel);
@@ -532,6 +566,7 @@ public class Main extends Application {
 		for (int i = 0; i < word.length(); i++) {
 			hide += " _";
 		}
+		wordToDraw.getStyleClass().add("outlineHide");
 		return hide;
 	}
 
@@ -543,6 +578,25 @@ public class Main extends Application {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
+	}
+
+	public void changeMusic(String song) {
+		player.stop();
+		if (!player.isMute()) {
+			music = new Media(song);
+			player = new MediaPlayer(music);
+			player.setStartTime(Duration.ZERO);
+			player.play();
+		} else {
+			music = new Media(song);
+			player = new MediaPlayer(music);
+			player.setStartTime(Duration.ZERO);
+			player.setMute(true);
+		}
+		player.setOnEndOfMedia( ()-> {
+			player.seek(Duration.ZERO);
+			player.play();
+		});
 	}
 
 	public static void main(String[] args) {
