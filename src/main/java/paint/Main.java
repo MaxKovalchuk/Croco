@@ -1,5 +1,5 @@
 /*TO DO:
- * 
+ * 2 PLAYERS ONLY!!!
  */
 package paint;
 
@@ -41,7 +41,7 @@ public class Main extends Application {
 	Button exit = new Button("Exit");
 	Button back = new Button("Back");
 	Button exitFromRoom = new Button("Leave");
-	String mainMenuTheme = Main.class.getResource("/Herbie Hancock - The Eye Of The Hurricane.mp3").toString();
+	String mainMenuTheme = Main.class.getResource("/Stan Getz & Bill Evans - But beautiful.mp3").toString();
 	String inGameTheme = Main.class.getResource("/Kenny Burrell - Midnight Blue.mp3").toString();
 	Media music;
 	MediaPlayer player;
@@ -99,7 +99,7 @@ public class Main extends Application {
 	GridPane clientVision = new GridPane();
 
 	public void gameStart() {
-		
+
 		wordBox.setVisible(false);
 		drawing.setVisible(false);
 		nextword.setVisible(false);
@@ -125,7 +125,6 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-//		primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream("crocoIcon.png")));
 
 		wordToDraw.getStyleClass().add("outline");
 		guess.getStyleClass().add("outline");
@@ -149,8 +148,7 @@ public class Main extends Application {
 					player.play();
 				} else {
 					player.setMute(true);
-					player.stop();
-					player.setStartTime(Duration.ZERO);
+					player.pause();
 				}
 			});
 
@@ -212,7 +210,7 @@ public class Main extends Application {
 		music = new Media(mainMenuTheme);
 		player = new MediaPlayer(music);
 		player.setStartTime(Duration.ZERO);
-		player.setOnEndOfMedia( ()-> {
+		player.setOnEndOfMedia(() -> {
 			player.seek(Duration.ZERO);
 			player.play();
 		});
@@ -224,7 +222,7 @@ public class Main extends Application {
 
 		clearAll.setOnAction(e -> {
 			g.setFill(Color.WHITE);
-			g.fillRect(0, 0, 300, 400);
+			g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 			try {
 				connection.sendCanvas(canvas);
 			} catch (Exception e1) {
@@ -309,7 +307,16 @@ public class Main extends Application {
 		chat.setPrefSize(300, 600);
 		chat.setAlignment(Pos.TOP_LEFT);
 		input.setOnAction(event -> {
-			if (!input.getText().equals("") || !input.getText().equals(" ")) {
+			boolean sendable = false;
+			for (int i = 0; i < input.getText().length(); i++) {
+				if (input.getText().charAt(i) == ' ') {
+					sendable = false;
+				} else {
+					sendable = true;
+					break;
+				}
+			}
+			if (sendable) {
 				String message = playerName + ": ";
 				message += input.getText();
 				messages.appendText(message + '\n');
@@ -593,7 +600,7 @@ public class Main extends Application {
 			player.setStartTime(Duration.ZERO);
 			player.setMute(true);
 		}
-		player.setOnEndOfMedia( ()-> {
+		player.setOnEndOfMedia(() -> {
 			player.seek(Duration.ZERO);
 			player.play();
 		});

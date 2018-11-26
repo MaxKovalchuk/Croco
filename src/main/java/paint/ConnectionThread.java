@@ -16,7 +16,11 @@ public class ConnectionThread implements Runnable {
 		this.nc = nc;
 		thread = new Thread(this);
 	}
-
+	
+	/*try to loop server.accept()
+	 * 		https://medium.com/@ssaurel/create-a-simple-http-web-server-in-java-3fc12b29d5fd
+	 * 
+	 */
 	@Override
 	public void run() {
 		try (ServerSocket server = nc.isServer() ? new ServerSocket(nc.getPort()) : null;
