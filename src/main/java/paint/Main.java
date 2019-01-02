@@ -1,11 +1,15 @@
 /*TO DO:
  * 2 PLAYERS ONLY!!!
+ * SQLite
  */
 package paint;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import javax.imageio.ImageIO;
 
@@ -212,10 +216,31 @@ public class Main extends Application {
 		player.setStartTime(Duration.ZERO);
 		player.setOnEndOfMedia(() -> {
 			player.seek(Duration.ZERO);
+			player.setVolume(0.2);
 			player.play();
 		});
+		player.setVolume(0.2);
 		player.play();
 		mainScene.setRoot(servOrClientPart());
+
+		Connection conn = null;
+		try {
+			String url = "jdbc:sqlite:sqlite.db";
+			conn = DriverManager.getConnection(url);
+
+			System.out.println("Connection to SQLite has been established.");
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getMessage());
+			}
+		}
 
 		g.setFill(Color.WHITE);
 		g.fillRect(0, 0, 350, 500);
@@ -593,15 +618,18 @@ public class Main extends Application {
 			music = new Media(song);
 			player = new MediaPlayer(music);
 			player.setStartTime(Duration.ZERO);
+			player.setVolume(0.3);
 			player.play();
 		} else {
 			music = new Media(song);
 			player = new MediaPlayer(music);
 			player.setStartTime(Duration.ZERO);
+			player.setVolume(0.3);
 			player.setMute(true);
 		}
 		player.setOnEndOfMedia(() -> {
 			player.seek(Duration.ZERO);
+			player.setVolume(0.2);
 			player.play();
 		});
 	}

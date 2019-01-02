@@ -16,9 +16,11 @@ public class ConnectionThread implements Runnable {
 		this.nc = nc;
 		thread = new Thread(this);
 	}
-	
-	/*try to loop server.accept()
-	 * 		https://medium.com/@ssaurel/create-a-simple-http-web-server-in-java-3fc12b29d5fd
+
+	/*
+	 * try to loop server.accept()
+	 * https://medium.com/@ssaurel/create-a-simple-http-web-server-in-java-
+	 * 3fc12b29d5fd
 	 * 
 	 */
 	@Override
@@ -33,6 +35,8 @@ public class ConnectionThread implements Runnable {
 			socket.setTcpNoDelay(true);
 
 			while (true) {
+				if (nc.isServer())
+					server.accept();
 				Serializable data = (Serializable) in.readObject();
 				nc.onRecieveCallBack.accept(data);
 			}
